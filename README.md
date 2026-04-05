@@ -4,7 +4,7 @@ Next.js 16 + Supabase social app implementing:
 
 - Authentication and authorization
 - Registration (first name, last name, email, password)
-- Protected feed route (`/feed`)
+- Protected feed experience (`/feed`)
 - Create post (text + optional image)
 - Post privacy (`public`/`private`)
 - Like/unlike for posts, comments, and replies
@@ -77,10 +77,13 @@ Behavior:
 ## Implemented pages and files
 
 - `src/app/feed/page.tsx`: Feed page (based on `req-files/feed.html`) + feed rendering
-- `src/components/login-form.tsx`: Login UI (provided design) + email login + Google OAuth
+- `src/components/login-form.tsx`: Login UI + email/password login
 - `src/components/sign-up-form.tsx`: Registration UI (provided design) + first/last/email/password
 - `src/app/protected/actions.ts`: Server Actions for post/comment/like mutations
+- `src/app/protected/page.tsx`: removed; `/feed` is the only feed entry route
 - `supabase/schema.sql`: Database schema, RLS, storage setup
+- `src/components/feed/`: Feed components (header, composer, cards, sidebars)
+- `src/lib/feed/`: Feed types and helper utilities
 
 ## Notes
 
@@ -88,3 +91,4 @@ Behavior:
 - Private posts are visible only to the post author.
 - Image uploads are limited to 5MB and image MIME types.
 - Supabase RLS enforces authz at DB/storage level.
+- Auth scope is intentionally simple: sign-up + login to access `/feed`.

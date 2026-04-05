@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -19,33 +20,39 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   const [repeatPassword, setRepeatPassword] = useState('')
   const [agreeToTerms, setAgreeToTerms] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeAction, setActiveAction] = useState<'email' | 'google' | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     const supabase = createClient()
-    setActiveAction('email')
+    setIsSubmitting(true)
     setError(null)
 
     if (!agreeToTerms) {
       setError('Please agree to terms and conditions')
-      setActiveAction(null)
+      setIsSubmitting(false)
       return
     }
 
     const normalizedFirstName = firstName.trim()
     const normalizedLastName = lastName.trim()
 
-    if (!normalizedFirstName || !normalizedLastName) {
-      setError('First and last name are required')
-      setActiveAction(null)
+    if (!normalizedFirstName) {
+      setError('First name is required')
+      setIsSubmitting(false)
+      return
+    }
+
+    if (!normalizedLastName) {
+      setError('Last name is required')
+      setIsSubmitting(false)
       return
     }
 
     if (password !== repeatPassword) {
       setError('Passwords do not match')
-      setActiveAction(null)
+      setIsSubmitting(false)
       return
     }
 
@@ -69,37 +76,14 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
-      setActiveAction(null)
-    }
-  }
-
-  const handleGoogleSignUp = async () => {
-    const supabase = createClient()
-    setActiveAction('google')
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/oauth?next=/feed`,
-        },
-      })
-
-      if (error) {
-        setError(error.message)
-        setActiveAction(null)
-      }
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
-      setActiveAction(null)
+      setIsSubmitting(false)
     }
   }
 
   return (
     <section
       className={cn(
-        'relative min-h-screen overflow-hidden bg-[#f4f5ff] px-4 py-8 sm:px-8 lg:px-12',
+        'relative min-h-screen overflow-hidden bg-[#f4f5ff] px-4 py-8 transition-colors duration-300 sm:px-8 lg:px-12 dark:bg-[#07101f]',
         className
       )}
       {...props}
@@ -109,21 +93,21 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         alt=""
         width={208}
         height={208}
-        className="pointer-events-none absolute left-0 top-0 hidden w-52 select-none lg:block"
+        className="pointer-events-none absolute left-0 top-0 hidden w-52 select-none lg:block dark:opacity-60"
       />
       <Image
         src="/auth/shape2.svg"
         alt=""
         width={224}
         height={224}
-        className="pointer-events-none absolute right-0 top-0 hidden w-56 select-none lg:block"
+        className="pointer-events-none absolute right-0 top-0 hidden w-56 select-none lg:block dark:opacity-60"
       />
       <Image
         src="/auth/shape3.svg"
         alt=""
         width={192}
         height={192}
-        className="pointer-events-none absolute bottom-0 left-1/3 hidden w-48 -translate-x-1/2 select-none lg:block"
+        className="pointer-events-none absolute bottom-0 left-1/3 hidden w-48 -translate-x-1/2 select-none lg:block dark:opacity-60"
       />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-10">
@@ -133,7 +117,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
             alt="Registration illustration"
             width={720}
             height={620}
-            className="mx-auto max-h-[620px] w-full max-w-3xl dark:hidden"
+            className="mx-auto max-h-155 w-full max-w-3xl dark:hidden"
             priority
           />
           <Image
@@ -141,68 +125,53 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
             alt="Registration illustration"
             width={720}
             height={620}
-            className="mx-auto hidden max-h-[620px] w-full max-w-3xl dark:block"
+            className="mx-auto hidden max-h-155 w-full max-w-3xl dark:block"
             priority
           />
         </div>
 
         <div className="w-full lg:max-w-md">
-          <div className="rounded-[32px] bg-white px-6 py-8 shadow-[0_25px_60px_rgba(54,52,112,0.14)] sm:px-8">
+          <div className="rounded-[32px] bg-white px-6 py-8 transition-colors duration-300 sm:px-8 dark:bg-slate-950">
             <Image src="/auth/logo.svg" alt="Buddy Script" width={160} height={40} className="mb-6 h-10 w-auto" />
 
-            <p className="mb-1 text-sm font-medium text-[#636783]">Get Started Now</p>
-            <h1 className="mb-8 text-3xl font-semibold text-[#1b1d33]">Registration</h1>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="mb-8 h-12 w-full justify-center gap-2 rounded-xl border-[#e3e6f4] text-[#2a2f45] hover:bg-[#f8f9ff]"
-              onClick={handleGoogleSignUp}
-              disabled={activeAction !== null}
-            >
-              <Image src="/auth/google.svg" alt="" width={20} height={20} className="h-5 w-5" />
-              <span>{activeAction === 'google' ? 'Redirecting...' : 'Register with Google'}</span>
-            </Button>
-
-            <div className="mb-8 flex items-center gap-3 text-sm text-[#8b90a8]">
-              <span className="h-px flex-1 bg-[#e6e8f3]" />
-              <span>Or</span>
-              <span className="h-px flex-1 bg-[#e6e8f3]" />
-            </div>
+            <p className="mb-1 text-sm font-medium text-[#636783] dark:text-slate-400">Get Started Now</p>
+            <h1 className="mb-8 text-3xl font-semibold text-[#1b1d33] dark:text-slate-100">Registration</h1>
 
             <form onSubmit={handleSignUp} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="first-name" className="text-sm font-medium text-[#31354f]">
+                  <Label htmlFor="first-name" className="text-sm font-medium text-[#31354f] dark:text-slate-200">
                     First Name
                   </Label>
                   <Input
                     id="first-name"
                     type="text"
                     required
+                    placeholder="John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="h-11 rounded-xl border-[#dde1ef]"
+                    className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="last-name" className="text-sm font-medium text-[#31354f]">
+                  <Label htmlFor="last-name" className="text-sm font-medium text-[#31354f] dark:text-slate-200">
                     Last Name
                   </Label>
                   <Input
                     id="last-name"
                     type="text"
                     required
+                    placeholder="Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="h-11 rounded-xl border-[#dde1ef]"
+                    className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-[#31354f]">
+                <Label htmlFor="email" className="text-sm font-medium text-[#31354f] dark:text-slate-200">
                   Email
                 </Label>
                 <Input
@@ -211,12 +180,12 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl border-[#dde1ef]"
+                  className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium text-[#31354f]">
+                <Label htmlFor="password" className="text-sm font-medium text-[#31354f] dark:text-slate-200">
                   Password
                 </Label>
                 <Input
@@ -225,12 +194,12 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 rounded-xl border-[#dde1ef]"
+                  className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="repeat-password" className="text-sm font-medium text-[#31354f]">
+                <Label htmlFor="repeat-password" className="text-sm font-medium text-[#31354f] dark:text-slate-200">
                   Repeat Password
                 </Label>
                 <Input
@@ -239,16 +208,16 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
-                  className="h-11 rounded-xl border-[#dde1ef]"
+                  className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
-              <label className="inline-flex items-center gap-2 pt-1 text-sm text-[#616783]">
-                <input
-                  type="checkbox"
+              <label htmlFor="agree-terms" className="inline-flex items-center gap-2 pt-1 text-sm text-[#616783] dark:text-slate-400">
+                <Checkbox
+                  id="agree-terms"
                   checked={agreeToTerms}
                   onChange={(e) => setAgreeToTerms(e.target.checked)}
-                  className="h-4 w-4 rounded border-[#cfd4e6] text-primary"
+                  className="border-[#cfd4e6] dark:border-slate-600"
                 />
                 I agree to terms &amp; conditions
               </label>
@@ -258,15 +227,15 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
               <Button
                 type="submit"
                 className="mt-5 h-12 w-full rounded-xl bg-[#5b63ff] text-white hover:bg-[#4f57eb]"
-                disabled={activeAction !== null}
+                disabled={isSubmitting}
               >
-                {activeAction === 'email' ? 'Creating account...' : 'Register now'}
+                {isSubmitting ? 'Creating account...' : 'Register now'}
               </Button>
             </form>
 
-            <p className="mt-8 text-center text-sm text-[#636783]">
+            <p className="mt-8 text-center text-sm text-[#636783] dark:text-slate-400">
               Already have an account?{' '}
-              <Link href="/login" className="font-semibold text-[#5b63ff] hover:underline">
+              <Link href="/login" className="font-semibold text-[#5b63ff] hover:underline dark:text-sky-300">
                 Login
               </Link>
             </p>

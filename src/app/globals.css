@@ -142,9 +142,30 @@
   * {
     @apply border-border outline-ring/50;
     }
+  html,
+  body,
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+  html {
+    @apply scroll-smooth;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     }
+  body,
   html {
     @apply font-sans;
     }

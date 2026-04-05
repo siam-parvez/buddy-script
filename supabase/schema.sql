@@ -8,9 +8,14 @@ create table if not exists public.profiles (
   first_name text not null default '',
   last_name text not null default '',
   email text not null unique,
+  avatar_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Existing projects created before avatar_url was introduced need this column added explicitly.
+alter table public.profiles
+add column if not exists avatar_url text;
 
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
@@ -85,17 +90,32 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, first_name, last_name, email)
+  insert into public.profiles (id, first_name, last_name, email, avatar_url)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data ->> 'first_name', ''),
-    coalesce(new.raw_user_meta_data ->> 'last_name', ''),
-    new.email
+    coalesce(
+      nullif(new.raw_user_meta_data ->> 'first_name', ''),
+      nullif(new.raw_user_meta_data ->> 'given_name', ''),
+      split_part(coalesce(new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'full_name', ''), ' ', 1),
+      ''
+    ),
+    coalesce(
+      nullif(new.raw_user_meta_data ->> 'last_name', ''),
+      nullif(new.raw_user_meta_data ->> 'family_name', ''),
+      nullif(regexp_replace(coalesce(new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'full_name', ''), '^\\S+\\s*', ''), ''),
+      ''
+    ),
+    new.email,
+    coalesce(
+      nullif(new.raw_user_meta_data ->> 'avatar_url', ''),
+      nullif(new.raw_user_meta_data ->> 'picture', '')
+    )
   )
   on conflict (id) do update
     set first_name = excluded.first_name,
         last_name = excluded.last_name,
         email = excluded.email,
+        avatar_url = excluded.avatar_url,
         updated_at = now();
 
   return new;
@@ -107,6 +127,55 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row
 execute function public.handle_new_user_profile();
+
+-- One-time repair/backfill for existing users.
+insert into public.profiles (id, first_name, last_name, email, avatar_url)
+select
+  u.id,
+  coalesce(
+    nullif(u.raw_user_meta_data ->> 'first_name', ''),
+    nullif(u.raw_user_meta_data ->> 'given_name', ''),
+    split_part(coalesce(u.raw_user_meta_data ->> 'name', u.raw_user_meta_data ->> 'full_name', ''), ' ', 1),
+    ''
+  ),
+  coalesce(
+    nullif(u.raw_user_meta_data ->> 'last_name', ''),
+    nullif(u.raw_user_meta_data ->> 'family_name', ''),
+    nullif(regexp_replace(coalesce(u.raw_user_meta_data ->> 'name', u.raw_user_meta_data ->> 'full_name', ''), '^\\S+\\s*', ''), ''),
+    ''
+  ),
+  u.email,
+  coalesce(
+    nullif(u.raw_user_meta_data ->> 'avatar_url', ''),
+    nullif(u.raw_user_meta_data ->> 'picture', '')
+  )
+from auth.users u
+on conflict (id) do update
+set
+  email = excluded.email,
+  first_name = coalesce(nullif(btrim(public.profiles.first_name), ''), excluded.first_name, ''),
+  last_name = coalesce(nullif(btrim(public.profiles.last_name), ''), excluded.last_name, ''),
+  avatar_url = coalesce(nullif(btrim(public.profiles.avatar_url), ''), excluded.avatar_url),
+  updated_at = now();
+
+-- Normalize malformed name splits like first_name='Siam', last_name='Siam Parvez'.
+update public.profiles
+set
+  last_name = btrim(substring(last_name from char_length(first_name) + 1)),
+  updated_at = now()
+where
+  btrim(first_name) <> ''
+  and btrim(last_name) <> ''
+  and lower(left(last_name, char_length(first_name))) = lower(first_name)
+  and substring(last_name from char_length(first_name) + 1 for 1) = ' ';
+
+update public.profiles
+set
+  last_name = '',
+  updated_at = now()
+where
+  btrim(first_name) <> ''
+  and lower(btrim(last_name)) = lower(btrim(first_name));
 
 alter table public.profiles enable row level security;
 alter table public.posts enable row level security;
