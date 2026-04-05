@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Buddy Script
 
-## Getting Started
+Next.js 16 + Supabase social app implementing:
 
-First, run the development server:
+- Authentication and authorization
+- Registration (first name, last name, email, password)
+- Protected feed route (`/feed`)
+- Create post (text + optional image)
+- Post privacy (`public`/`private`)
+- Like/unlike for posts, comments, and replies
+- Comments + replies
+- "Liked by" display for posts/comments/replies
+
+## Stack
+
+- Frontend: Next.js App Router (React 19)
+- Backend/data/auth/storage: Supabase
+- DB: Postgres (via Supabase)
+
+## 1) Environment setup
+
+Create `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_ANON_KEY
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 2) Database + storage setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run `supabase/schema.sql` in Supabase SQL editor.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Or run the automated CLI setup:
 
-## Learn More
+```bash
+pnpm setup:supabase
+```
 
-To learn more about Next.js, take a look at the following resources:
+If CLI is not authenticated yet:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npx supabase login
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If your project ref is not derivable from `.env.local`, also export:
 
-## Deploy on Vercel
+```bash
+export SUPABASE_PROJECT_REF=YOUR_PROJECT_REF
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This creates:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `profiles`
+- `posts`
+- `comments` (supports replies via `parent_id`)
+- `post_likes`
+- `comment_likes`
+- Indexes for feed read patterns
+- RLS policies for authz and visibility
+- `post-images` storage bucket + storage policies
+- Trigger to create/update profile rows from auth users
+
+## 3) Install and run
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Open `http://localhost:3000`.
+
+Behavior:
+
+- If authenticated, `/` redirects to `/feed`
+- If not authenticated, `/` redirects to `/login`
+
+## Implemented pages and files
+
+- `src/app/feed/page.tsx`: Feed page (based on `req-files/feed.html`) + feed rendering
+- `src/components/login-form.tsx`: Login UI (provided design) + email login + Google OAuth
+- `src/components/sign-up-form.tsx`: Registration UI (provided design) + first/last/email/password
+- `src/app/protected/actions.ts`: Server Actions for post/comment/like mutations
+- `supabase/schema.sql`: Database schema, RLS, storage setup
+
+## Notes
+
+- Feed results are shown with newest posts first.
+- Private posts are visible only to the post author.
+- Image uploads are limited to 5MB and image MIME types.
+- Supabase RLS enforces authz at DB/storage level.

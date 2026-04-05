@@ -1,7 +1,12 @@
-import Image from "next/image";
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-  return (
-    <></>
-  );
+import { createClient } from '@/lib/server'
+
+export default async function Home() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  redirect(user ? '/feed' : '/login')
 }
