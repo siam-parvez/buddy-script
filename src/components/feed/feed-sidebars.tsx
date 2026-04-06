@@ -3,7 +3,7 @@ import { Heart, Home, ImagePlus, MessageSquare, Users2 } from 'lucide-react'
 export function LeftSidebar() {
   return (
     <aside className="hidden min-h-0 lg:col-span-3 lg:block lg:h-full lg:overflow-y-auto lg:pr-1">
-      <div className="space-y-4 pb-4 mt-4">
+      <div className="space-y-4 pb-4 mt-12">
         <section className="rounded-[28px] border border-white/70 bg-white/90 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Explore</h3>
           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
@@ -43,7 +43,7 @@ export function LeftSidebar() {
 export function RightSidebar() {
   return (
     <aside className="hidden min-h-0 lg:col-span-3 lg:block lg:h-full lg:overflow-y-auto lg:pl-1">
-      <div className="space-y-4 pb-4 mt-4">
+      <div className="space-y-4 pb-4 mt-12">
         <section className="rounded-[28px] border border-white/70 bg-white/90 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">You Might Like</h3>
           <div className="space-y-3 text-sm text-slate-500 dark:text-slate-400">

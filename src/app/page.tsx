@@ -80,10 +80,10 @@ export default async function FeedPage() {
     }
 
     return (
-      <div className="flex h-dvh flex-col overflow-hidden bg-[#f4f6fb] text-slate-900 transition-colors duration-300 dark:bg-[#07101f] dark:text-slate-100">
+      <div className="flex min-h-dvh flex-col bg-[#f4f6fb] text-slate-900 transition-colors duration-300 lg:h-dvh lg:overflow-hidden dark:bg-[#07101f] dark:text-slate-100">
         <FeedHeader currentUserName={currentUserName} currentUserAvatarUrl={currentUserAvatarUrl} />
 
-        <main className="relative mx-auto flex min-h-0 flex-1 items-center px-4 pt-[80px] pb-4 sm:px-6 sm:pt-[80px] sm:pb-6">
+        <main className="relative mx-auto flex min-h-0 flex-1 items-center px-4 pt-[80px] pb-4 sm:px-6 sm:pt-[80px] sm:pb-6 lg:overflow-hidden">
           <div className="w-full rounded-[28px] border border-white/70 bg-white/90 p-6 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
             <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Database setup required</h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
@@ -96,7 +96,8 @@ export default async function FeedPage() {
   }
 
   const rawPosts = (postsData ?? []) as unknown as PostRecord[]
-  const postIds = rawPosts.map((post) => post.id)
+  const visiblePosts = rawPosts.filter((post) => post.visibility === 'public' || post.author_id === user.id)
+  const postIds = visiblePosts.map((post) => post.id)
 
   const { data: commentsData, error: commentsError } = postIds.length
     ? await supabase
@@ -131,7 +132,7 @@ export default async function FeedPage() {
 
   const feedPosts: FeedPost[] = []
 
-  for (const post of rawPosts) {
+  for (const post of visiblePosts) {
     let imageUrl: string | null = null
 
     if (post.image_path) {
@@ -148,15 +149,15 @@ export default async function FeedPage() {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#f4f6fb] text-slate-900 transition-colors duration-300 dark:bg-[#07101f] dark:text-slate-100">
+    <div className="flex min-h-dvh flex-col bg-[#f4f6fb] text-slate-900 transition-colors duration-300 lg:h-dvh lg:overflow-hidden dark:bg-[#07101f] dark:text-slate-100">
       <FeedHeader currentUserName={currentUserName} currentUserAvatarUrl={currentUserAvatarUrl} />
 
-      <main className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 overflow-hidden px-4 pt-[80px] sm:px-6 lg:pt-[80px]">
+      <main className="relative mx-auto flex min-h-0 w-full max-w-7xl flex-1 overflow-y-auto px-4 pt-10 pb-4 sm:px-6 lg:overflow-hidden lg:pb-0">
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-12">
           <LeftSidebar />
 
           <section className="min-h-0 lg:col-span-6 lg:h-full lg:overflow-y-auto lg:pr-1">
-            <div className="space-y-4 mt-4">
+            <div className="space-y-4 mt-12">
               <CreatePostCard currentUserName={currentUserName} currentUserAvatarUrl={currentUserAvatarUrl} />
 
               {feedPosts.length === 0 ? (
