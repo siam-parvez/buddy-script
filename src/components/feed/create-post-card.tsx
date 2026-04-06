@@ -24,15 +24,19 @@ type CreatePostCardProps = {
   currentUserAvatarUrl?: string | null
 }
 
+const MIN_POST_CONTENT_LENGTH = 20
+
 export function CreatePostCard({ currentUserName, currentUserAvatarUrl }: CreatePostCardProps) {
   const formRef = useRef<HTMLFormElement | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewName, setPreviewName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [resetKey, setResetKey] = useState(0)
   const firstName = currentUserName.trim().split(/\s+/)[0] ?? currentUserName
+  const trimmedContentLength = content.trim().length
 
   useEffect(() => {
     return () => {
@@ -78,6 +82,11 @@ export function CreatePostCard({ currentUserName, currentUserAvatarUrl }: Create
       return
     }
 
+    if (trimmedContentLength < MIN_POST_CONTENT_LENGTH) {
+      setError(`At least ${MIN_POST_CONTENT_LENGTH} characters are needed to create a post`)
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
 
@@ -88,6 +97,7 @@ export function CreatePostCard({ currentUserName, currentUserAvatarUrl }: Create
       await createPost(formData)
       form.reset()
       clearPreview()
+      setContent('')
       setResetKey((value) => value + 1)
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
@@ -116,6 +126,14 @@ export function CreatePostCard({ currentUserName, currentUserAvatarUrl }: Create
             name="content"
             rows={8}
             placeholder={`What's on your mind, ${firstName}?`}
+            maxLength={2000}
+            value={content}
+            onChange={(event) => {
+              setContent(event.target.value)
+              if (error) {
+                setError(null)
+              }
+            }}
             className="w-full resize-none bg-slate-50 px-4 py-3 text-[15px] outline-none transition placeholder:text-slate-400 focus:ring-1 focus:ring-[#e4e8ff] dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500 border"
           />
 

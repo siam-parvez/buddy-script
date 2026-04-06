@@ -27,7 +27,11 @@ export const signUpSchema = z
   })
 
 export const createPostSchema = z.object({
-  content: z.string().trim().max(2000, 'Post content must be 2000 characters or fewer'),
+  content: z
+    .string()
+    .trim()
+    .min(20, 'At least 20 characters are needed to create a post')
+    .max(2000, 'Post content must be 2000 characters or fewer'),
   visibility: z.enum(['public', 'private']),
 })
 
