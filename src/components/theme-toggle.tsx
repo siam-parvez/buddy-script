@@ -23,16 +23,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     >
       <span className="text-sm font-medium">Theme</span>
 
-      <span className="relative flex items-center  transition-colors ">
-        <span
-          className={cn(
-            'flex h-6 w-6 items-center justify-center  text-primary shadow-sm transition-transform  dark:text-sky-300',
-            isDark ? 'translate-x-6' : 'translate-x-0'
-          )}
-        >
-          {isDark ? <MoonStar className="h-3.5 w-3.5" /> : <SunMedium className="h-3.5 w-3.5" />}
-        </span>
-      </span>
+      {isDark ? <MoonStar className="h-3.5 w-3.5" /> : <SunMedium className="h-3.5 w-3.5" />}
 
     </Button>
   )

@@ -81,7 +81,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://bscript.vercel.app/auth/callback',
+          redirectTo: `${window.location.origin}/oauth?next=/`,
         },
       })
 
