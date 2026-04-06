@@ -40,12 +40,14 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   const isLoginRoute = pathname === '/login'
-  const isSignUpRoute = pathname === '/auth/sign-up'
-  const isPublicAuthRoute = pathname.startsWith('/auth') || isLoginRoute
+  const isSignUpRoute = pathname === '/sign-up'
+  const isOauthRoute = pathname === '/oauth'
+  const isErrorRoute = pathname === '/error'
+  const isPublicAuthRoute = isLoginRoute || isSignUpRoute || isOauthRoute || isErrorRoute
 
   if (user && (isLoginRoute || isSignUpRoute)) {
     const url = request.nextUrl.clone()
-    url.pathname = '/feed'
+    url.pathname = '/'
     return NextResponse.redirect(url)
   }
 

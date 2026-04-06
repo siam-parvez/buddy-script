@@ -12,8 +12,10 @@ function Avatar({ className, ...props }: React.ComponentProps<'span'>) {
   )
 }
 
-function AvatarImage({ className, ...props }: React.ComponentProps<'img'>) {
-  return <img data-slot="avatar-image" className={cn('h-full w-full object-cover', className)} {...props} />
+function AvatarImage({ className, alt, ...props }: React.ComponentProps<'img'>) {
+  // Avatar images can come from arbitrary remote URLs, so this primitive intentionally uses a native img element.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img data-slot="avatar-image" alt={alt ?? ''} className={cn('h-full w-full object-cover', className)} {...props} />
 }
 
 function AvatarFallback({ className, ...props }: React.ComponentProps<'span'>) {

@@ -7,6 +7,7 @@ import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/client'
+import { signUpSchema } from '@/lib/validation/forms'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -20,63 +21,77 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   const [repeatPassword, setRepeatPassword] = useState('')
   const [agreeToTerms, setAgreeToTerms] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCredentialSubmitting, setIsCredentialSubmitting] = useState(false)
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false)
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
-    setIsSubmitting(true)
+    setIsCredentialSubmitting(true)
     setError(null)
 
-    if (!agreeToTerms) {
-      setError('Please agree to terms and conditions')
-      setIsSubmitting(false)
+    const parsed = signUpSchema.safeParse({
+      firstName,
+      lastName,
+      email,
+      password,
+      repeatPassword,
+      agreeToTerms,
+    })
+
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Invalid registration input')
+      setIsCredentialSubmitting(false)
       return
     }
 
-    const normalizedFirstName = firstName.trim()
-    const normalizedLastName = lastName.trim()
-
-    if (!normalizedFirstName) {
-      setError('First name is required')
-      setIsSubmitting(false)
-      return
-    }
-
-    if (!normalizedLastName) {
-      setError('Last name is required')
-      setIsSubmitting(false)
-      return
-    }
-
-    if (password !== repeatPassword) {
-      setError('Passwords do not match')
-      setIsSubmitting(false)
-      return
-    }
+    const supabase = createClient()
 
     try {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: parsed.data.email,
+        password: parsed.data.password,
         options: {
           data: {
-            first_name: normalizedFirstName,
-            last_name: normalizedLastName,
+            first_name: parsed.data.firstName,
+            last_name: parsed.data.lastName,
           },
-          emailRedirectTo: `${window.location.origin}/feed`,
+          emailRedirectTo: `${window.location.origin}/`,
         },
       })
       if (error) {
         setError(error.message)
         return
       }
-      router.push('/auth/sign-up-success')
+
+      router.push('/')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
-      setIsSubmitting(false)
+      setIsCredentialSubmitting(false)
+    }
+  }
+
+  const handleGoogleSignUp = async () => {
+    const supabase = createClient()
+    setIsGoogleSubmitting(true)
+    setError(null)
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://bscript.vercel.app/auth/callback',
+        },
+      })
+
+      if (error) {
+        setError(error.message)
+        setIsGoogleSubmitting(false)
+      }
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'An error occurred')
+      setIsGoogleSubmitting(false)
     }
   }
 
@@ -94,6 +109,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         width={208}
         height={208}
         className="pointer-events-none absolute left-0 top-0 hidden w-52 select-none lg:block dark:opacity-60"
+        style={{ height: 'auto' }}
       />
       <Image
         src="/auth/shape2.svg"
@@ -101,6 +117,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         width={224}
         height={224}
         className="pointer-events-none absolute right-0 top-0 hidden w-56 select-none lg:block dark:opacity-60"
+        style={{ height: 'auto' }}
       />
       <Image
         src="/auth/shape3.svg"
@@ -108,6 +125,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         width={192}
         height={192}
         className="pointer-events-none absolute bottom-0 left-1/3 hidden w-48 -translate-x-1/2 select-none lg:block dark:opacity-60"
+        style={{ height: 'auto' }}
       />
 
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-10">
@@ -118,6 +136,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
             width={720}
             height={620}
             className="mx-auto max-h-155 w-full max-w-3xl dark:hidden"
+            style={{ height: 'auto' }}
             priority
           />
           <Image
@@ -126,16 +145,39 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
             width={720}
             height={620}
             className="mx-auto hidden max-h-155 w-full max-w-3xl dark:block"
+            style={{ height: 'auto' }}
             priority
           />
         </div>
 
         <div className="w-full lg:max-w-md">
           <div className="rounded-[32px] bg-white px-6 py-8 transition-colors duration-300 sm:px-8 dark:bg-slate-950">
-            <Image src="/auth/logo.svg" alt="Buddy Script" width={160} height={40} className="mb-6 h-10 w-auto" />
+            <Image
+              src="/auth/logo.svg"
+              alt="Buddy Script"
+              width={160}
+              height={40}
+              className="mb-6 h-10 w-auto"
+              style={{ width: 'auto' }}
+            />
 
             <p className="mb-1 text-sm font-medium text-[#636783] dark:text-slate-400">Get Started Now</p>
             <h1 className="mb-8 text-3xl font-semibold text-[#1b1d33] dark:text-slate-100">Registration</h1>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignUp}
+              className="mb-6 h-12 w-full border-[#dde1ef] bg-transparent text-[#31354f] hover:bg-[#f5f7ff] dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-900"
+              disabled={isCredentialSubmitting || isGoogleSubmitting}
+            >
+              <Image src="/auth/google.svg" alt="Google" width={16} height={16} className="mr-2 h-4 w-4" />
+              {isGoogleSubmitting ? 'Connecting...' : 'Register with Google'}
+            </Button>
+
+            <div className="mb-6 text-center text-sm text-[#636783] dark:text-slate-400">
+              <span>Or</span>
+            </div>
 
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -150,7 +192,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                     placeholder="John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    className="h-11 border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                   />
                 </div>
 
@@ -165,7 +207,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                     placeholder="Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    className="h-11 border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                   />
                 </div>
               </div>
@@ -180,7 +222,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                  className="h-11 border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
@@ -194,7 +236,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                  className="h-11 border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
@@ -208,7 +250,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
-                  className="h-11 rounded-xl border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                  className="h-11 border-[#dde1ef] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
@@ -226,16 +268,16 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
 
               <Button
                 type="submit"
-                className="mt-5 h-12 w-full rounded-xl bg-[#5b63ff] text-white hover:bg-[#4f57eb]"
-                disabled={isSubmitting}
+                className="mt-5 h-12 w-full text-white "
+                disabled={isCredentialSubmitting || isGoogleSubmitting}
               >
-                {isSubmitting ? 'Creating account...' : 'Register now'}
+                {isCredentialSubmitting ? 'Creating account...' : 'Register now'}
               </Button>
             </form>
 
             <p className="mt-8 text-center text-sm text-[#636783] dark:text-slate-400">
               Already have an account?{' '}
-              <Link href="/login" className="font-semibold text-[#5b63ff] hover:underline dark:text-sky-300">
+              <Link href="/login" className="font-semibold text-primary hover:underline dark:text-sky-300">
                 Login
               </Link>
             </p>

@@ -1,4 +1,4 @@
-import { Bell, Heart, Home, ImagePlus, MessageSquare, MessageSquareReply, Users2 } from 'lucide-react'
+import { Heart, Home, ImagePlus, MessageSquare, Users2 } from 'lucide-react'
 
 export function LeftSidebar() {
   return (
@@ -7,7 +7,7 @@ export function LeftSidebar() {
         <section className="rounded-[28px] border border-white/70 bg-white/90 p-4 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Explore</h3>
           <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-            <li className="flex items-center gap-3 rounded-2xl bg-[#f4f6ff] px-3 py-2 font-medium text-[#3d4ed7] dark:bg-slate-800/80 dark:text-sky-300">
+            <li className="flex items-center gap-3 rounded-2xl bg-[#f4f6ff] px-3 py-2 font-medium text-primary dark:bg-slate-800/80 dark:text-sky-300">
               <Home className="h-4 w-4" />
               Home feed
             </li>
@@ -30,12 +30,8 @@ export function LeftSidebar() {
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Shortcuts</h3>
           <div className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex gap-3 rounded-2xl border border-dashed border-[#dce1ff] bg-[#f8f9ff] px-3 py-3 dark:border-slate-700 dark:bg-slate-900/70">
-              <ImagePlus className="mt-0.5 h-4 w-4 flex-none text-[#5b63ff] dark:text-sky-300" />
+              <ImagePlus className="mt-0.5 h-4 w-4 flex-none text-primary dark:text-sky-300" />
               <span>Create a post, share an image, and keep your feed public or private.</span>
-            </div>
-            <div className="flex gap-3 rounded-2xl border border-dashed border-[#dce1ff] bg-[#f8f9ff] px-3 py-3 dark:border-slate-700 dark:bg-slate-900/70">
-              <MessageSquareReply className="mt-0.5 h-4 w-4 flex-none text-[#5b63ff] dark:text-sky-300" />
-              <span>Likes, comments, and replies all remain fully interactive.</span>
             </div>
           </div>
         </section>
@@ -52,10 +48,7 @@ export function RightSidebar() {
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">You Might Like</h3>
           <div className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
             <div className="rounded-2xl border border-dashed border-[#dce1ff] bg-[#f8f9ff] px-3 py-3 dark:border-slate-700 dark:bg-slate-900/70">
-              Suggested people and widgets from the original feed layout.
-            </div>
-            <div className="rounded-2xl border border-dashed border-[#dce1ff] bg-[#f8f9ff] px-3 py-3 dark:border-slate-700 dark:bg-slate-900/70">
-              Decorative panels are preserved so the page still feels like the source design.
+              Suggested people and widgets goes here.
             </div>
           </div>
         </section>
@@ -64,12 +57,8 @@ export function RightSidebar() {
           <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">Your Friends</h3>
           <div className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex gap-3 rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-900/70">
-              <Users2 className="mt-0.5 h-4 w-4 flex-none text-[#5b63ff] dark:text-sky-300" />
-              <span>Friend list panel follows the right sidebar structure.</span>
-            </div>
-            <div className="flex gap-3 rounded-2xl bg-slate-50 px-3 py-3 dark:bg-slate-900/70">
-              <Bell className="mt-0.5 h-4 w-4 flex-none text-[#5b63ff] dark:text-sky-300" />
-              <span>Add more widgets later without changing the current shell.</span>
+              <Users2 className="mt-0.5 h-4 w-4 flex-none text-primary dark:text-sky-300" />
+              <span>Friend list goes here.</span>
             </div>
           </div>
         </section>

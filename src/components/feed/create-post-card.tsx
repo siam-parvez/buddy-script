@@ -3,7 +3,7 @@
 import { ImagePlus, Send } from 'lucide-react'
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 
-import { createPost } from '@/app/protected/actions'
+import { createPost } from '@/app/(feed)/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -101,7 +101,7 @@ export function CreatePostCard({ currentUserName, currentUserAvatarUrl }: Create
 
         <div className="flex flex-wrap items-center gap-3 rounded-[18px] border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-800 dark:bg-slate-900/70">
           <label className="flex cursor-pointer items-center gap-2 rounded-full px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/80">
-            <ImagePlus className="h-4 w-4 text-[#5b63ff] dark:text-sky-300" />
+            <ImagePlus className="h-4 w-4 text-primary dark:text-sky-300" />
             Photo/video
             <Input
               ref={inputRef}
@@ -119,7 +119,7 @@ export function CreatePostCard({ currentUserName, currentUserAvatarUrl }: Create
               id="visibility"
               name="visibility"
               defaultValue="public"
-              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 outline-none transition focus:border-[#5b63ff] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 outline-none transition focus:border-primary dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
             >
               <option value="public">Public</option>
               <option value="private">Private</option>

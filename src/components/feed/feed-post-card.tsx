@@ -3,7 +3,7 @@
 import { Globe, Heart, LockKeyhole, MessageSquareReply, Send, Trash2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 
-import { createComment, deletePost, toggleCommentLike, togglePostLike } from '@/app/protected/actions'
+import { createComment, deletePost, toggleCommentLike, togglePostLike } from '@/app/(feed)/actions'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'

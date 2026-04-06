@@ -25,7 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("h-full", "antialiased", poppins.variable, "font-sans")}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      className={cn("h-full", "antialiased", poppins.variable, "font-sans")}
+    >
       <body className="min-h-screen flex flex-col bg-background text-foreground">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           {children}
@@ -34,5 +39,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-// tfU5x!dg333L:yr

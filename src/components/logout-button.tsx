@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import type { ComponentProps } from 'react'
-
+import {LogOut} from "lucide-react"
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 
@@ -23,7 +23,7 @@ export function LogoutButton({ className, variant = 'default', size = 'default' 
 
   return (
     <Button onClick={logout} className={className} variant={variant} size={size}>
-      Logout
+      <span>Logout</span><LogOut/>
     </Button>
   )
 }
